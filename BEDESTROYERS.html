@@ -2093,7 +2093,35 @@
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; background-color: #87CEEB; touch-action: none; font-family: 'Inter', sans-serif; user-select: none; }
-        canvas { display: block; image-rendering: pixelated; }
+        canvas { display:block; width:100vw; height:100vh; height:100dvh; image-rendering:pixelated; }
+        button:not(:disabled), a[href], [role="button"], .hotbar-slot,
+        input[type="range"], input[type="checkbox"], input[type="color"], select, summary,
+        label[for], label:has(input[type="checkbox"]), label:has(input[type="range"]), label:has(select) { cursor:pointer !important; }
+        #shop-ui { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); overflow-y:auto; overscroll-behavior:contain; }
+        #shop-ui .shop-dialog { width:min(94vw, 42rem); max-height:calc(100dvh - 16px); min-height:0; padding:clamp(10px, 2vw, 24px); overflow:hidden; }
+        #shop-ui .shop-dialog > .shop-items-scroll { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+        #shop-ui .shop-dialog h2 { font-size:clamp(1.15rem, 3vw, 1.875rem); line-height:1.2; }
+        #shop-ui .shop-dialog .shop-items-scroll > div { padding:clamp(8px, 1.5vw, 16px); }
+        #shop-ui .shop-dialog .shop-items-scroll button { flex-shrink:0; padding:8px 10px; }
+        #mobile-layout-editor { position:fixed; inset:0; z-index:10002; background:rgba(2,6,23,.78); color:white; }
+        #mobile-layout-toolbar { position:fixed; z-index:10004; top:max(8px, env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(94vw, 560px); max-height:42vh; overflow-y:auto; padding:12px; background:rgba(15,23,42,.97); border:2px solid rgba(125,211,252,.65); box-shadow:0 12px 40px rgba(0,0,0,.45); }
+        #pc-controls-editor { position:fixed; inset:0; z-index:10002; display:flex; align-items:center; justify-content:center; padding:12px; background:rgba(2,6,23,.82); }
+        #pc-controls-editor[hidden], #mobile-layout-editor[hidden] { display:none !important; }
+        .pc-keybind-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(148,163,184,.18); }
+        .pc-keybind-button { min-width:112px; border:1px solid #60a5fa; background:#1e3a8a; padding:7px 10px; font-weight:800; cursor:pointer; }
+        .pc-keybind-button.is-listening { background:#92400e; border-color:#fbbf24; color:#fef3c7; }
+        #mobile-controls { display:none; position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; z-index:46; justify-content:initial; align-items:initial; padding:0; gap:0; pointer-events:none; }
+        body.mobile-mode.mobile-game-active #mobile-controls, body.mobile-mode.mobile-layout-editing #mobile-controls { display:block !important; }
+        .mobile-joystick { position:absolute; left:10px; bottom:10px; transform:scale(var(--mobile-joystick-scale, 1)); transform-origin:bottom left; }
+        .mobile-right-controls { position:absolute; left:auto; right:10px; bottom:10px; transform:scale(var(--mobile-jump-scale, 1)); transform-origin:bottom left; }
+        body.mobile-layout-editing #mobile-controls { z-index:10003 !important; }
+        body.mobile-layout-editing #mobile-controls .mobile-joystick,
+        body.mobile-layout-editing #mobile-controls .mobile-right-controls { outline:2px dashed rgba(125,211,252,.9); outline-offset:5px; cursor:move; touch-action:none; }
+        #mobile-layout-editor .layout-editor-hint { color:#bfdbfe; font-size:12px; text-align:center; margin-top:5px; }
+        @media (max-width:520px) {
+            #shop-ui .shop-dialog { width:calc(100vw - 12px); max-height:calc(100dvh - 12px); }
+            #mobile-layout-toolbar { max-height:48vh; padding:9px; }
+        }
         .glass-panel { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 0; }
         .hotbar-slot { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 2px solid #555; border-radius: 0; display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.5rem; transition: border-color 0.2s; cursor: pointer; }
         .hotbar-slot.active { border-color: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
@@ -2346,6 +2374,15 @@
         }
         @media (prefers-reduced-motion: reduce) { .mobile-control-btn { transition:none !important; } }
 
+        /* Final touch-control layout overrides (kept after the original mobile rules). */
+        #mobile-controls { position:fixed; inset:0; top:0; right:0; bottom:auto; left:0; width:100vw; height:100vh; height:100dvh; justify-content:initial; align-items:initial; padding:0; gap:0; pointer-events:none; }
+        body.mobile-mode.mobile-game-active #mobile-controls, body.mobile-mode.mobile-layout-editing #mobile-controls { display:block !important; }
+        #mobile-controls .mobile-joystick { position:absolute; transform:scale(var(--mobile-joystick-scale, 1)); transform-origin:bottom left; }
+        #mobile-controls .mobile-right-controls { position:absolute; transform:scale(var(--mobile-jump-scale, 1)); transform-origin:bottom left; }
+        #mobile-controls .mobile-control-btn { cursor:pointer; }
+        button:not(:disabled), a[href], [role="button"], .hotbar-slot,
+        input[type="range"], input[type="checkbox"], input[type="color"], select, summary,
+        label[for], label:has(input[type="checkbox"]), label:has(input[type="range"]), label:has(select) { cursor:pointer !important; }
     </style>
 </head>
 <body class="text-white">
@@ -2590,8 +2627,8 @@
     <h2 class="text-6xl font-extrabold text-white mb-8 drop-shadow-lg">OPTIONS</h2>
     
     <div class="glass-panel p-6 w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-5 text-base border-2 border-white/20 max-h-[75vh] overflow-y-auto">
-        <section class="bg-slate-800/70 p-4 border border-slate-600 space-y-3"><h3 class="text-xl font-bold text-cyan-300">GRAPHICS</h3><label class="flex justify-between items-center">Visual effects <input type="checkbox" id="opt-effects" checked class="w-5 h-5 accent-blue-500"></label><label class="flex justify-between items-center">Show FPS <input type="checkbox" id="opt-show-fps" class="w-5 h-5 accent-blue-500"></label><div><div class="flex justify-between"><span>UI Scale</span><span id="ui-scale-val" class="font-mono text-gray-400">1.0x</span></div><input type="range" id="opt-ui-scale" min="0.5" max="1.5" step="0.1" value="1.0" class="w-full accent-blue-500"></div></section>
-        <section class="bg-slate-800/70 p-4 border border-slate-600 space-y-3"><h3 class="text-xl font-bold text-green-300">CONTROLS</h3><label class="flex justify-between items-center gap-3 font-bold text-cyan-200">Mobile mode / touch controls <input type="checkbox" id="opt-mobile-mode" class="w-6 h-6 accent-blue-500"></label><p class="text-xs text-gray-400">Show a compact horizontal joystick and jump button on phones and tablets.</p><div><div class="flex justify-between"><label for="opt-mobile-controls-scale">Mobile controls size</label><span id="mobile-controls-scale-val" class="font-mono text-gray-400">1.0x</span></div><input type="range" id="opt-mobile-controls-scale" min="0.7" max="1.3" step="0.1" value="1.0" class="w-full accent-cyan-500"><p class="text-xs text-gray-400">Adjust the joystick and jump button without changing the rest of the HUD.</p></div><div class="text-sm text-gray-300">Desktop: WASD / arrows · Space to jump<br>Tap/click the map to attack, interact, break beds or place the selected item.<br>Choose items with the hotbar · Apple: Q</div><div><div class="flex justify-between"><span>Zoom speed</span><span id="zoom-speed-val" class="font-mono text-gray-400">1.0x</span></div><input type="range" id="opt-zoom-speed" min="0.5" max="2" step="0.1" value="1" class="w-full accent-green-500"></div></section>
+        <section class="bg-slate-800/70 p-4 border border-slate-600 space-y-3"><h3 class="text-xl font-bold text-cyan-300">GRAPHICS</h3><label class="flex justify-between items-center">Visual effects <input type="checkbox" id="opt-effects" checked class="w-5 h-5 accent-blue-500"></label><label class="flex justify-between items-center">Show FPS <input type="checkbox" id="opt-show-fps" class="w-5 h-5 accent-blue-500"></label><div><div class="flex justify-between gap-2"><label for="opt-video-quality">Video Quality</label><span id="video-quality-val" class="font-mono text-gray-400">100%</span></div><input type="range" id="opt-video-quality" min="0.5" max="1" step="0.1" value="1" class="w-full accent-cyan-500"><p class="text-xs text-gray-400">Adjusts render resolution: lower values can help slower devices.</p></div><div><div class="flex justify-between"><span>UI Scale</span><span id="ui-scale-val" class="font-mono text-gray-400">1.0x</span></div><input type="range" id="opt-ui-scale" min="0.5" max="1.5" step="0.1" value="1.0" class="w-full accent-blue-500"></div></section>
+        <section class="bg-slate-800/70 p-4 border border-slate-600 space-y-3"><h3 class="text-xl font-bold text-green-300">CONTROLS</h3><label class="flex justify-between items-center gap-3 font-bold text-cyan-200">Mobile mode / touch controls <input type="checkbox" id="opt-mobile-mode" class="w-6 h-6 accent-blue-500"></label><p class="text-xs text-gray-400">Show touch controls on phones and tablets. Their position and size can be edited individually.</p><button id="btn-pc-controls" type="button" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 font-bold border border-indigo-400 w-full">PC Control Mapping</button><div id="mobile-layout-option" class="hidden"><button id="btn-edit-mobile-layout" type="button" class="bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-2 font-bold border border-cyan-400 w-full">Edit Controller Layout (Mobile)</button><p class="text-xs text-gray-400 mt-1">Drag each touch control and change its size in the editor.</p></div><div class="text-sm text-gray-300">Use the PC mapping editor to configure movement, jump, interaction, hotbar, apple and power-up keys.<br>Tap/click the map to attack, build or interact.</div><div><div class="flex justify-between"><span>Zoom speed</span><span id="zoom-speed-val" class="font-mono text-gray-400">1.0x</span></div><input type="range" id="opt-zoom-speed" min="0.5" max="2" step="0.1" value="1" class="w-full accent-green-500"></div></section>
         <section class="bg-slate-800/70 p-4 border border-slate-600 space-y-3"><h3 class="text-xl font-bold text-purple-300">VIDEO</h3><button id="btn-fullscreen" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 font-bold border-2 border-indigo-400 w-full">TOGGLE FULLSCREEN</button><div><div class="flex justify-between"><span>World Scale</span><span id="world-scale-val" class="font-mono text-gray-400">1.0x</span></div><input type="range" id="opt-world-scale" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-purple-500"></div></section>
         <section class="bg-slate-800/70 p-4 border border-slate-600 space-y-3"><h3 class="text-xl font-bold text-yellow-300">DATA</h3><p class="text-sm text-gray-300">Profile, XP, match history and achievements are stored only on this device.</p><button id="btn-reset-data" class="bg-red-800 hover:bg-red-700 text-white px-4 py-2 font-bold border-2 border-red-500 w-full">RESET SAVED DATA</button></section>
     </div>
@@ -2672,6 +2709,33 @@
 </div>
 
 
+<div id="pc-controls-editor" hidden aria-hidden="true">
+    <section class="glass-panel w-full max-w-xl max-h-[88vh] overflow-y-auto p-5 border-2 border-blue-400">
+        <div class="flex items-center justify-between gap-3 mb-3"><h2 class="text-2xl font-black text-blue-200">PC Control Mapping</h2><button id="btn-pc-controls-close-x" type="button" class="text-3xl text-slate-300" aria-label="Close">×</button></div>
+        <p class="text-sm text-slate-300 mb-3">Select an action, then press the key you want to assign. Changes are saved automatically.</p>
+        <div id="pc-keybind-list" class="space-y-1"></div>
+        <p id="pc-keybind-status" class="text-sm text-amber-200 mt-3" aria-live="polite">Select “Change” to reassign an action.</p>
+        <div class="flex flex-wrap gap-2 mt-4"><button id="btn-pc-controls-reset" type="button" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 px-3 py-2 font-bold">Restore Defaults</button><button id="btn-pc-controls-close" type="button" class="bg-blue-600 hover:bg-blue-500 border border-blue-400 px-5 py-2 font-bold">Done</button></div>
+    </section>
+</div>
+
+<div id="mobile-layout-editor" hidden aria-hidden="true">
+    <section id="mobile-layout-toolbar" class="rounded-sm">
+        <div class="flex items-center justify-between gap-2"><h2 class="text-lg sm:text-xl font-black text-cyan-200">Edit Controller Layout</h2><span class="text-xs text-slate-400">MOBILE</span></div>
+        <p class="layout-editor-hint">Drag the joystick or Jump button. Select a control to resize it.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+            <label class="flex flex-col gap-1 text-sm font-bold">Selected Control
+                <select id="layout-selected-control" class="bg-slate-900 border border-slate-500 px-2 py-2 text-white"><option value="joystick">Movement Joystick</option><option value="jump">Jump Button</option></select>
+            </label>
+            <label class="flex flex-col gap-1 text-sm font-bold">Size <span id="layout-size-value" class="text-cyan-200">100%</span>
+                <input id="layout-control-size" type="range" min="0.6" max="1.6" step="0.1" value="1" class="w-full accent-cyan-400">
+            </label>
+        </div>
+        <div class="flex flex-wrap gap-2 justify-between mt-3"><button id="btn-reset-mobile-layout" type="button" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 px-3 py-2 text-sm font-bold">Reset Layout</button><button id="btn-close-mobile-layout" type="button" class="bg-cyan-700 hover:bg-cyan-600 border border-cyan-300 px-5 py-2 font-bold">Save & Close</button></div>
+    </section>
+    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 text-center text-white/70 text-xs pointer-events-none">Your control layout is saved on this device.</div>
+</div>
+
 <div id="mobile-status" aria-hidden="true">TAP MAP TO ATTACK, BUILD OR INTERACT</div>
 <div id="mobile-controls" aria-label="Mobile touch controls">
     <div id="mobile-joystick" class="mobile-joystick" role="group" aria-label="Horizontal movement joystick">
@@ -2701,7 +2765,7 @@
 </div>
 
 <div id="shop-ui" class="absolute inset-0 bg-black/80 hidden flex items-center justify-center z-40 pointer-events-auto backdrop-blur-sm">
-    <div class="bg-slate-800 rounded-none p-6 w-11/12 max-w-2xl shadow-2xl border-4 border-slate-600 flex flex-col max-h-[90vh] ui-scalable-center">
+    <div class="shop-dialog bg-slate-800 rounded-none shadow-2xl border-4 border-slate-600 flex flex-col ui-scalable-center">
         <div class="flex justify-between items-center mb-4 border-b border-gray-600 pb-2">
             <h2 class="text-3xl font-bold text-yellow-400 flex items-center gap-2">🛒 Villager Shop</h2>
             <button id="btn-close-shop" class="text-gray-400 hover:text-white text-4xl leading-none">&times;</button>
@@ -2713,7 +2777,7 @@
             <div class="text-cyan-300">💎 <span id="shop-diamond">0</span></div>
         </div>
 
-        <div class="overflow-y-auto space-y-4 pr-2">
+        <div class="shop-items-scroll space-y-4 pr-2">
             <div class="bg-slate-700 p-4 rounded-none">
                 <h3 class="text-xl font-bold mb-2 text-blue-300">Blocks & Explosives</h3>
                 <div class="flex justify-between items-center bg-slate-800 p-3 rounded-none mb-2 border border-slate-600">
@@ -2867,6 +2931,9 @@
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+let viewportWidth = window.innerWidth;
+let viewportHeight = window.innerHeight;
+let canvasRenderQuality = 1;
 const TILE_SIZE = 32;
 
 const GRAVITY = 0.4;
@@ -2877,8 +2944,15 @@ const JUMP_FORCE = 8.5;
 const VOID_Y = 1000;
 
 function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    viewportWidth = window.innerWidth;
+    viewportHeight = window.innerHeight;
+    const scale = Math.max(0.5, Math.min(1, Number(canvasRenderQuality) || 1));
+    canvas.style.width = `${viewportWidth}px`;
+    canvas.style.height = `${viewportHeight}px`;
+    canvas.width = Math.max(1, Math.round(viewportWidth * scale));
+    canvas.height = Math.max(1, Math.round(viewportHeight * scale));
+    // All game logic remains in CSS pixels; only the canvas backing resolution changes.
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
 }
 window.addEventListener('resize', resize);
 resize();
@@ -3469,20 +3543,250 @@ function checkTeamElimination(team) {
     if (state.mode === 'PLAYING' && teamIsEliminated(team)) endGame(team !== 'player');
 }
 
-let settings = { showFps: false, uiScale: 1.0, mobileControlsScale: 1.0, worldScale: 1.0, effects: true, zoomSpeed: 1.0, mobileMode: false };
+const SETTINGS_KEY = 'bedestroyers-settings-v2';
+const DEFAULT_PC_CONTROLS = {
+    left: 'KeyA', right: 'KeyD', jump: 'Space', interact: 'KeyE',
+    slot1: 'Digit1', slot2: 'Digit2', slot3: 'Digit3', apple: 'KeyQ', powerups: 'KeyP'
+};
+const DEFAULT_CONTROLLER_LAYOUT = {
+    joystick: { x: 0, y: 0, scale: 1 },
+    jump: { x: 100, y: 0, scale: 1 }
+};
+const DEFAULT_SETTINGS = {
+    showFps: false, uiScale: 1, worldScale: 1, effects: true, zoomSpeed: 1,
+    videoQuality: 1, mobileMode: false, pcControls: { ...DEFAULT_PC_CONTROLS },
+    controllerLayout: {
+        joystick: { ...DEFAULT_CONTROLLER_LAYOUT.joystick },
+        jump: { ...DEFAULT_CONTROLLER_LAYOUT.jump }
+    }
+};
+function readSavedSettings() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch {}
+    const merged = { ...DEFAULT_SETTINGS, ...saved };
+    merged.pcControls = { ...DEFAULT_PC_CONTROLS, ...(saved.pcControls || {}) };
+    merged.controllerLayout = {
+        joystick: { ...DEFAULT_CONTROLLER_LAYOUT.joystick, ...(saved.controllerLayout?.joystick || {}) },
+        jump: { ...DEFAULT_CONTROLLER_LAYOUT.jump, ...(saved.controllerLayout?.jump || {}) }
+    };
+    for (const key of ['uiScale', 'worldScale', 'zoomSpeed', 'videoQuality']) {
+        if (!Number.isFinite(Number(merged[key]))) merged[key] = DEFAULT_SETTINGS[key];
+        merged[key] = Number(merged[key]);
+    }
+    merged.uiScale = Math.max(0.5, Math.min(1.5, merged.uiScale));
+    merged.worldScale = Math.max(0.5, Math.min(2, merged.worldScale));
+    merged.zoomSpeed = Math.max(0.5, Math.min(2, merged.zoomSpeed));
+    merged.videoQuality = Math.max(0.5, Math.min(1, merged.videoQuality));
+    for (const control of ['joystick', 'jump']) {
+        const layout = merged.controllerLayout[control];
+        layout.x = Math.max(0, Math.min(100, Number(layout.x) || 0));
+        layout.y = Math.max(0, Math.min(100, Number(layout.y) || 0));
+        layout.scale = Math.max(0.6, Math.min(1.6, Number(layout.scale) || 1));
+    }
+    for (const action of Object.keys(DEFAULT_PC_CONTROLS)) {
+        if (typeof merged.pcControls[action] !== 'string' || !merged.pcControls[action]) merged.pcControls[action] = DEFAULT_PC_CONTROLS[action];
+    }
+    return merged;
+}
+let settings = readSavedSettings();
+function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
+}
 
 function setMobileMode(enabled, persist = true) {
     settings.mobileMode = Boolean(enabled);
     document.body.classList.toggle('mobile-mode', settings.mobileMode);
     const toggle = document.getElementById('opt-mobile-mode');
     if (toggle) toggle.checked = settings.mobileMode;
-    if (persist) { try { localStorage.setItem('bedestroyers-mobile-mode-v1', settings.mobileMode ? '1' : '0'); } catch {} }
+    const layoutOption = document.getElementById('mobile-layout-option');
+    if (layoutOption) layoutOption.classList.toggle('hidden', !settings.mobileMode);
+    if (persist) {
+        try { localStorage.setItem('bedestroyers-mobile-mode-v1', settings.mobileMode ? '1' : '0'); } catch {}
+        saveSettings();
+    }
 }
 (function initMobileMode() {
     let saved = null; try { saved = localStorage.getItem('bedestroyers-mobile-mode-v1'); } catch {}
     const autoMobile = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 760;
-    setMobileMode(saved === null ? autoMobile : saved === '1', false);
+    setMobileMode(saved === null ? Boolean(settings.mobileMode || autoMobile) : saved === '1', false);
+    canvasRenderQuality = settings.videoQuality;
+    resize();
+    document.documentElement.style.setProperty('--ui-scale', settings.uiScale);
+    document.documentElement.style.setProperty('--mobile-joystick-scale', settings.controllerLayout.joystick.scale);
+    document.documentElement.style.setProperty('--mobile-jump-scale', settings.controllerLayout.jump.scale);
+    document.getElementById('opt-effects').checked = Boolean(settings.effects);
+    document.getElementById('opt-show-fps').checked = Boolean(settings.showFps);
+    document.getElementById('fps-counter').classList.toggle('hidden', !settings.showFps);
+    document.getElementById('opt-ui-scale').value = settings.uiScale;
+    document.getElementById('ui-scale-val').innerText = settings.uiScale.toFixed(1) + 'x';
+    document.getElementById('opt-world-scale').value = settings.worldScale;
+    document.getElementById('world-scale-val').innerText = settings.worldScale.toFixed(1) + 'x';
+    document.getElementById('opt-zoom-speed').value = settings.zoomSpeed;
+    document.getElementById('zoom-speed-val').innerText = settings.zoomSpeed.toFixed(1) + 'x';
+    document.getElementById('opt-video-quality').value = settings.videoQuality;
+    document.getElementById('video-quality-val').innerText = `${Math.round(settings.videoQuality * 100)}%`;
 })();
+
+function boundActionForCode(code) {
+    return Object.keys(settings.pcControls).find(action => settings.pcControls[action] === code) || null;
+}
+function keyCodeLabel(code) {
+    if (code === 'Space') return 'Space';
+    if (code.startsWith('Key')) return code.slice(3).toUpperCase();
+    if (code.startsWith('Digit')) return code.slice(5);
+    if (code.startsWith('Arrow')) return `Arrow ${code.slice(5)}`;
+    if (code === 'Escape') return 'Esc';
+    if (code === 'Enter') return 'Enter';
+    if (code === 'Backspace') return 'Backspace';
+    if (code === 'Tab') return 'Tab';
+    return code;
+}
+const PC_CONTROL_LABELS = {
+    left: 'Move Left', right: 'Move Right', jump: 'Jump', interact: 'Interact / Mine',
+    slot1: 'Hotbar Slot 1', slot2: 'Hotbar Slot 2', slot3: 'Hotbar Slot 3',
+    apple: 'Eat Golden Apple', powerups: 'Open Power-up Inventory'
+};
+let bindingCaptureAction = null;
+function renderPCControls() {
+    const list = document.getElementById('pc-keybind-list');
+    if (!list) return;
+    list.replaceChildren();
+    for (const action of Object.keys(DEFAULT_PC_CONTROLS)) {
+        const row = document.createElement('div');
+        row.className = 'pc-keybind-row';
+        const label = document.createElement('span');
+        label.className = 'text-sm text-slate-100';
+        label.textContent = PC_CONTROL_LABELS[action];
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pc-keybind-button' + (bindingCaptureAction === action ? ' is-listening' : '');
+        button.textContent = bindingCaptureAction === action ? 'Press a key…' : keyCodeLabel(settings.pcControls[action]);
+        button.setAttribute('aria-label', `Change: ${PC_CONTROL_LABELS[action]}`);
+        button.addEventListener('click', () => {
+            bindingCaptureAction = action;
+            document.getElementById('pc-keybind-status').textContent = `Press the new key for: ${PC_CONTROL_LABELS[action]}. Esc cancels.`;
+            renderPCControls();
+        });
+        row.append(label, button);
+        list.appendChild(row);
+    }
+}
+function openPCControlsEditor() {
+    bindingCaptureAction = null;
+    const modal = document.getElementById('pc-controls-editor');
+    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    document.getElementById('pc-keybind-status').textContent = 'Select “Change” to reassign an action.';
+    renderPCControls();
+}
+function closePCControlsEditor() {
+    bindingCaptureAction = null;
+    const modal = document.getElementById('pc-controls-editor');
+    modal.hidden = true; modal.setAttribute('aria-hidden', 'true');
+    renderPCControls();
+}
+
+let layoutSelectedControl = 'joystick';
+let layoutEditorHadGameControls = false;
+function controlElement(name) {
+    return name === 'jump' ? document.querySelector('.mobile-right-controls') : document.getElementById('mobile-joystick');
+}
+function applyControllerLayout() {
+    for (const name of ['joystick', 'jump']) {
+        const element = controlElement(name);
+        if (!element) continue;
+        const layout = settings.controllerLayout[name];
+        const scale = Math.max(0.6, Math.min(1.6, layout.scale || 1));
+        element.style.transform = `scale(${scale})`;
+        element.style.transformOrigin = 'bottom left';
+        const width = element.offsetWidth || (name === 'jump' ? 76 : 154);
+        const height = element.offsetHeight || (name === 'jump' ? 76 : 62);
+        const margin = 10;
+        const maxX = Math.max(margin, window.innerWidth - width * scale - margin);
+        const maxY = Math.max(margin, window.innerHeight - height * scale - margin);
+        element.style.left = `${margin + (maxX - margin) * layout.x / 100}px`;
+        element.style.right = 'auto';
+        element.style.bottom = `${margin + (maxY - margin) * layout.y / 100}px`;
+    }
+    const selected = settings.controllerLayout[layoutSelectedControl];
+    const sizeSlider = document.getElementById('layout-control-size');
+    const sizeLabel = document.getElementById('layout-size-value');
+    if (sizeSlider && selected) sizeSlider.value = selected.scale;
+    if (sizeLabel && selected) sizeLabel.textContent = `${Math.round(selected.scale * 100)}%`;
+}
+function syncLayoutSelection() {
+    layoutSelectedControl = document.getElementById('layout-selected-control').value;
+    applyControllerLayout();
+}
+function openMobileLayoutEditor() {
+    if (!settings.mobileMode) return;
+    layoutEditorHadGameControls = document.body.classList.contains('mobile-game-active');
+    document.body.classList.add('mobile-layout-editing', 'mobile-game-active');
+    const editor = document.getElementById('mobile-layout-editor');
+    editor.hidden = false; editor.setAttribute('aria-hidden', 'false');
+    document.getElementById('layout-selected-control').value = layoutSelectedControl;
+    requestAnimationFrame(applyControllerLayout);
+}
+function closeMobileLayoutEditor() {
+    const editor = document.getElementById('mobile-layout-editor');
+    editor.hidden = true; editor.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('mobile-layout-editing');
+    if (!layoutEditorHadGameControls) document.body.classList.remove('mobile-game-active');
+    saveSettings();
+}
+function resetMobileLayout() {
+    settings.controllerLayout = {
+        joystick: { ...DEFAULT_CONTROLLER_LAYOUT.joystick },
+        jump: { ...DEFAULT_CONTROLLER_LAYOUT.jump }
+    };
+    document.documentElement.style.setProperty('--mobile-joystick-scale', settings.controllerLayout.joystick.scale);
+    document.documentElement.style.setProperty('--mobile-jump-scale', settings.controllerLayout.jump.scale);
+    saveSettings(); applyControllerLayout();
+}
+function moveLayoutControl(element, name, deltaX, deltaY) {
+    const layout = settings.controllerLayout[name];
+    const scale = layout.scale || 1;
+    const margin = 10;
+    const width = element.offsetWidth || element.getBoundingClientRect().width / scale;
+    const height = element.offsetHeight || element.getBoundingClientRect().height / scale;
+    const maxX = Math.max(margin, window.innerWidth - width * scale - margin);
+    const maxY = Math.max(margin, window.innerHeight - height * scale - margin);
+    const currentLeft = parseFloat(element.style.left) || margin;
+    const currentBottom = parseFloat(element.style.bottom) || margin;
+    const nextLeft = Math.max(margin, Math.min(maxX, currentLeft + deltaX));
+    const nextBottom = Math.max(margin, Math.min(maxY, currentBottom - deltaY));
+    layout.x = maxX <= margin ? 0 : ((nextLeft - margin) / (maxX - margin)) * 100;
+    layout.y = maxY <= margin ? 0 : ((nextBottom - margin) / (maxY - margin)) * 100;
+    element.style.left = `${nextLeft}px`;
+    element.style.bottom = `${nextBottom}px`;
+    saveSettings();
+}
+function enableControlDragging(element, name) {
+    if (!element) return;
+    let drag = null;
+    element.addEventListener('pointerdown', event => {
+        if (!document.body.classList.contains('mobile-layout-editing')) return;
+        event.preventDefault(); event.stopImmediatePropagation();
+        drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+        try { element.setPointerCapture(event.pointerId); } catch {}
+        layoutSelectedControl = name;
+        document.getElementById('layout-selected-control').value = name;
+        applyControllerLayout();
+    }, true);
+    element.addEventListener('pointermove', event => {
+        if (!drag || drag.pointerId !== event.pointerId || !document.body.classList.contains('mobile-layout-editing')) return;
+        event.preventDefault(); event.stopImmediatePropagation();
+        const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+        drag.x = event.clientX; drag.y = event.clientY;
+        moveLayoutControl(element, name, dx, dy);
+    }, true);
+    const stopDrag = event => { if (drag && (event.pointerId === undefined || drag.pointerId === event.pointerId)) drag = null; };
+    element.addEventListener('pointerup', stopDrag, true);
+    element.addEventListener('pointercancel', stopDrag, true);
+    element.addEventListener('lostpointercapture', stopDrag, true);
+}
+enableControlDragging(document.getElementById('mobile-joystick'), 'joystick');
+enableControlDragging(document.querySelector('.mobile-right-controls'), 'jump');
+window.addEventListener('resize', () => { if (settings.mobileMode || document.body.classList.contains('mobile-layout-editing')) requestAnimationFrame(applyControllerLayout); });
 
 /* --- STREAMING_CHUNK:Options Menu Functionality --- */
 function openOptionsMenu() {
@@ -3588,15 +3892,38 @@ document.getElementById('btn-fullscreen').addEventListener('click', () => {
 
 document.getElementById('opt-show-fps').addEventListener('change', (e) => {
     settings.showFps = e.target.checked;
-    const fpsEl = document.getElementById('fps-counter');
-    if (settings.showFps) {
-        fpsEl.classList.remove('hidden');
-    } else {
-        fpsEl.classList.add('hidden');
-    }
+    document.getElementById('fps-counter').classList.toggle('hidden', !settings.showFps);
+    saveSettings();
 });
 
-document.getElementById('opt-effects').addEventListener('change', (e) => { settings.effects = e.target.checked; });
+document.getElementById('opt-effects').addEventListener('change', (e) => { settings.effects = e.target.checked; saveSettings(); });
+document.getElementById('opt-video-quality').addEventListener('input', (e) => {
+    settings.videoQuality = Math.max(0.5, Math.min(1, parseFloat(e.target.value) || 1));
+    canvasRenderQuality = settings.videoQuality;
+    document.getElementById('video-quality-val').innerText = `${Math.round(settings.videoQuality * 100)}%`;
+    resize();
+    saveSettings();
+});
+
+document.getElementById('btn-pc-controls').addEventListener('click', openPCControlsEditor);
+document.getElementById('btn-pc-controls-close').addEventListener('click', closePCControlsEditor);
+document.getElementById('btn-pc-controls-close-x').addEventListener('click', closePCControlsEditor);
+document.getElementById('btn-pc-controls-reset').addEventListener('click', () => {
+    settings.pcControls = { ...DEFAULT_PC_CONTROLS };
+    bindingCaptureAction = null;
+    saveSettings(); renderPCControls();
+    document.getElementById('pc-keybind-status').textContent = 'Default controls restored.';
+});
+document.getElementById('btn-edit-mobile-layout').addEventListener('click', openMobileLayoutEditor);
+document.getElementById('btn-close-mobile-layout').addEventListener('click', closeMobileLayoutEditor);
+document.getElementById('btn-reset-mobile-layout').addEventListener('click', resetMobileLayout);
+document.getElementById('layout-selected-control').addEventListener('change', syncLayoutSelection);
+document.getElementById('layout-control-size').addEventListener('input', event => {
+    const value = Math.max(0.6, Math.min(1.6, parseFloat(event.target.value) || 1));
+    settings.controllerLayout[layoutSelectedControl].scale = value;
+    document.documentElement.style.setProperty(layoutSelectedControl === 'jump' ? '--mobile-jump-scale' : '--mobile-joystick-scale', value);
+    saveSettings(); applyControllerLayout();
+});
 document.getElementById('opt-mobile-mode').addEventListener('change', (e) => setMobileMode(e.target.checked));
 document.getElementById('opt-zoom-speed').addEventListener('input', (e) => {
     settings.zoomSpeed = parseFloat(e.target.value);
@@ -3615,17 +3942,13 @@ document.getElementById('opt-ui-scale').addEventListener('input', (e) => {
     settings.uiScale = parseFloat(e.target.value);
     document.getElementById('ui-scale-val').innerText = settings.uiScale.toFixed(1) + 'x';
     document.documentElement.style.setProperty('--ui-scale', settings.uiScale);
-});
-
-document.getElementById('opt-mobile-controls-scale').addEventListener('input', (e) => {
-    settings.mobileControlsScale = parseFloat(e.target.value);
-    document.getElementById('mobile-controls-scale-val').innerText = settings.mobileControlsScale.toFixed(1) + 'x';
-    document.documentElement.style.setProperty('--mobile-controls-scale', settings.mobileControlsScale);
+    saveSettings();
 });
 
 document.getElementById('opt-world-scale').addEventListener('input', (e) => {
     settings.worldScale = parseFloat(e.target.value);
     document.getElementById('world-scale-val').innerText = settings.worldScale.toFixed(1) + 'x';
+    saveSettings();
 });
 
 /* --- STREAMING_CHUNK:UI Notification Helpers --- */
@@ -4001,15 +4324,15 @@ class Player extends Entity {
         }
 
         if (!state.shopOpen && !state.powerupsOpen) {
-            if (state.keys['a'] || state.keys['KeyA'] || state.keys['ArrowLeft']) { this.vx -= 1.0; this.facingRight = false; }
-            if (state.keys['d'] || state.keys['KeyD'] || state.keys['ArrowRight']) { this.vx += 1.0; this.facingRight = true; }
-            if ((state.keys['w'] || state.keys['KeyW'] || state.keys['ArrowUp'] || state.keys['Space'] || state.keys[' ']) && this.onGround) {
+            if (state.keys['__control_left'] || state.keys['__mobile_left'] || (settings.pcControls.left === DEFAULT_PC_CONTROLS.left && state.keys['ArrowLeft'])) { this.vx -= 1.0; this.facingRight = false; }
+            if (state.keys['__control_right'] || state.keys['__mobile_right'] || (settings.pcControls.right === DEFAULT_PC_CONTROLS.right && state.keys['ArrowRight'])) { this.vx += 1.0; this.facingRight = true; }
+            if ((state.keys['__control_jump'] || state.keys['__mobile_jump'] || (settings.pcControls.jump === DEFAULT_PC_CONTROLS.jump && (state.keys['w'] || state.keys['KeyW'] || state.keys['ArrowUp']))) && this.onGround) {
                 this.vy = -JUMP_FORCE; this.onGround = false;
             }
-            if (state.keys['1']) { this.selectedSlot = 1; updateHotbarUI(); state.keys['1'] = false; }
-            if (state.keys['2']) { this.selectedSlot = 2; updateHotbarUI(); state.keys['2'] = false; }
-            if (state.keys['3']) { this.selectedSlot = 3; updateHotbarUI(); state.keys['3'] = false; }
-            if (state.keys['q'] || state.keys['Q']) { this.eatGoldenApple(); state.keys['q'] = false; state.keys['Q'] = false; }
+            if (state.keys['__control_slot1']) { this.selectedSlot = 1; updateHotbarUI(); state.keys['__control_slot1'] = false; }
+            if (state.keys['__control_slot2']) { this.selectedSlot = 2; updateHotbarUI(); state.keys['__control_slot2'] = false; }
+            if (state.keys['__control_slot3']) { this.selectedSlot = 3; updateHotbarUI(); state.keys['__control_slot3'] = false; }
+            if (state.keys['__control_apple']) { this.eatGoldenApple(); state.keys['__control_apple'] = false; }
         }
         
         const currentMaxSpeed = PLAYER_SPEED * (this.speedBoostTimer > 0 ? 1.7 : 1);
@@ -4040,7 +4363,7 @@ class Player extends Entity {
 
         state.npcs.forEach(npc => {
             let dist = Math.hypot((this.x + this.w/2) - (npc.x + npc.w/2), (this.y + this.h/2) - (npc.y + npc.h/2));
-            if ((dist < 50 && state.keys['e']) || (dist < 50 && state.mouse.left && this.buildCooldown === 0)) {
+            if ((dist < 50 && state.keys['__control_interact']) || (dist < 50 && state.mouse.left && this.buildCooldown === 0)) {
                 openShop();
             }
         });
@@ -5235,6 +5558,7 @@ function startGame(fromLanPeer = false) {
         ui.game.classList.add('flex', 'flex-col');
         initWorld();
         document.body.classList.toggle('mobile-game-active', settings.mobileMode);
+        if (settings.mobileMode) requestAnimationFrame(applyControllerLayout);
         state.mode = 'PAUSED';
         state.lastTimerTimestamp = null;
     }, () => {
@@ -5459,13 +5783,35 @@ function endGame(outcome) {
     title.classList.add(isVictory ? 'victory-animation' : result === 'draw' ? 'victory-animation' : 'defeat-animation');
 }
 
-window.addEventListener('keydown', (e) => { 
+window.addEventListener('keydown', (e) => {
+    if (bindingCaptureAction) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        if (e.code === 'Escape') {
+            bindingCaptureAction = null; renderPCControls();
+            document.getElementById('pc-keybind-status').textContent = 'Key assignment canceled.';
+            return;
+        }
+        if (e.repeat || ['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight','Unidentified'].includes(e.code)) return;
+        const duplicate = Object.entries(settings.pcControls).find(([action, code]) => action !== bindingCaptureAction && code === e.code);
+        if (duplicate) {
+            document.getElementById('pc-keybind-status').textContent = `The key ${keyCodeLabel(e.code)} is already assigned to “${PC_CONTROL_LABELS[duplicate[0]]}”. Choose another key.`;
+            return;
+        }
+        const action = bindingCaptureAction;
+        settings.pcControls[action] = e.code;
+        bindingCaptureAction = null;
+        saveSettings(); renderPCControls();
+        document.getElementById('pc-keybind-status').textContent = `${PC_CONTROL_LABELS[action]}: ${keyCodeLabel(e.code)} saved.`;
+        return;
+    }
     if ((e.key === 'Escape' || e.key === 'Esc') && state.powerupsOpen) {
         closePowerupsInventory();
         e.preventDefault();
         return;
     }
-    if (state.mode === 'PLAYING' && e.key.toLowerCase() === 'p' && !state.shopOpen) {
+    const pressedAction = boundActionForCode(e.code);
+    if (pressedAction) state.keys[`__control_${pressedAction}`] = true;
+    if (state.mode === 'PLAYING' && pressedAction === 'powerups' && !state.shopOpen) {
         openPowerupsInventory();
         e.preventDefault();
         return;
@@ -5484,7 +5830,9 @@ window.addEventListener('keydown', (e) => {
     state.keys[e.code] = true;
     if (state.mode === 'PLAYING' && ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
 });
-window.addEventListener('keyup', (e) => { 
+window.addEventListener('keyup', (e) => {
+    const releasedAction = boundActionForCode(e.code);
+    if (releasedAction) state.keys[`__control_${releasedAction}`] = false;
     state.keys[e.key] = false;
     state.keys[e.key.toLowerCase()] = false;
     state.keys[e.code] = false;
@@ -5494,8 +5842,8 @@ function updateMouseWorldFromClient(clientX, clientY) {
     const currentZoom = state.camera.zoom * (settings.worldScale || 1.0);
     state.mouse.x = clientX;
     state.mouse.y = clientY;
-    state.mouse.worldX = (clientX - canvas.width / 2) / currentZoom + state.camera.x;
-    state.mouse.worldY = (clientY - canvas.height / 2) / currentZoom + state.camera.y;
+    state.mouse.worldX = (clientX - viewportWidth / 2) / currentZoom + state.camera.x;
+    state.mouse.worldY = (clientY - viewportHeight / 2) / currentZoom + state.camera.y;
 }
 
 canvas.addEventListener('pointermove', (e) => {
@@ -5542,16 +5890,17 @@ const mobileHeld = { left:false, right:false, jump:false };
 function releaseMobileAction(action) {
     if (!(action in mobileHeld)) return;
     mobileHeld[action] = false;
-    const keyByAction = { left:'a', right:'d', jump:'Space' };
+    const keyByAction = { left:'__mobile_left', right:'__mobile_right', jump:'__mobile_jump' };
     if (keyByAction[action]) state.keys[keyByAction[action]] = false;
     document.querySelectorAll(`[data-mobile-hold="${action}"]`).forEach(button => button.classList.remove('pressed'));
 }
 function pressMobileAction(action, button) {
+    if (document.body.classList.contains('mobile-layout-editing')) return;
     if (state.mode !== 'PLAYING' || state.shopOpen || state.powerupsOpen) return;
     if (!(action in mobileHeld)) return;
     mobileHeld[action] = true;
     if (button) button.classList.add('pressed');
-    if (action === 'jump') state.keys['Space'] = true;
+    if (action === 'jump') state.keys['__mobile_jump'] = true;
 }
 
 document.querySelectorAll('[data-mobile-hold]').forEach(button => {
@@ -5582,8 +5931,8 @@ function updateMobileJoystick(clientX) {
     const movingRight = offset > 9;
     mobileHeld.left = movingLeft;
     mobileHeld.right = movingRight;
-    state.keys['a'] = movingLeft;
-    state.keys['d'] = movingRight;
+    state.keys['__mobile_left'] = movingLeft;
+    state.keys['__mobile_right'] = movingRight;
     mobileJoystickKnob.style.transform = `translate(calc(-50% + ${offset}px), -50%)`;
     mobileJoystick.classList.toggle('active', movingLeft || movingRight);
 }
@@ -5591,12 +5940,13 @@ function resetMobileJoystick() {
     mobileJoystickPointerId = null;
     mobileHeld.left = false;
     mobileHeld.right = false;
-    state.keys['a'] = false;
-    state.keys['d'] = false;
+    state.keys['__mobile_left'] = false;
+    state.keys['__mobile_right'] = false;
     mobileJoystickKnob.style.transform = 'translate(-50%, -50%)';
     mobileJoystick.classList.remove('active');
 }
 mobileJoystick.addEventListener('pointerdown', event => {
+    if (document.body.classList.contains('mobile-layout-editing')) return;
     if (state.mode !== 'PLAYING' || state.shopOpen || state.powerupsOpen) return;
     event.preventDefault();
     mobileJoystickPointerId = event.pointerId;
@@ -5798,7 +6148,7 @@ function gameLoop(timestamp) {
 
 /* --- STREAMING_CHUNK:Rendering Engine --- */
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, viewportWidth, viewportHeight);
     const isMenuBackground = state.mode === 'MENU';
     if (state.mode !== 'PLAYING' && state.mode !== 'PAUSED' && !isMenuBackground) return;
 
@@ -5818,7 +6168,7 @@ function draw() {
     let finalZoom = state.camera.zoom * settings.worldScale;
 
     ctx.save();
-    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.translate(viewportWidth/2, viewportHeight/2);
     ctx.scale(finalZoom, finalZoom);
     ctx.translate(-state.camera.x, -state.camera.y);
 
@@ -5829,10 +6179,10 @@ function draw() {
         ctx.fillRect(px, py, 2, 2);
     }
 
-    const startC = Math.floor((state.camera.x - canvas.width/2/finalZoom) / TILE_SIZE);
-    const endC = Math.floor((state.camera.x + canvas.width/2/finalZoom) / TILE_SIZE);
-    const startR = Math.floor((state.camera.y - canvas.height/2/finalZoom) / TILE_SIZE);
-    const endR = Math.floor((state.camera.y + canvas.height/2/finalZoom) / TILE_SIZE);
+    const startC = Math.floor((state.camera.x - viewportWidth/2/finalZoom) / TILE_SIZE);
+    const endC = Math.floor((state.camera.x + viewportWidth/2/finalZoom) / TILE_SIZE);
+    const startR = Math.floor((state.camera.y - viewportHeight/2/finalZoom) / TILE_SIZE);
+    const endR = Math.floor((state.camera.y + viewportHeight/2/finalZoom) / TILE_SIZE);
 
     for (let c = startC; c <= endC; c++) {
         for (let r = startR; r <= endR; r++) {
